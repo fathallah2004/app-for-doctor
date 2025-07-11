@@ -1,0 +1,330 @@
+{
+  "name": "My workflow 9",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "web scraping ",
+        "formDescription": "web scraping for llm ",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "urls",
+              "placeholder": "https://web.com",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -40,
+        0
+      ],
+      "id": "061a1caa-4517-49b5-9c31-b7d980b65d87",
+      "name": "On form submission",
+      "webhookId": "7c3f8ef6-e170-430b-b3a3-87422b5a89a7"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.firecrawl.dev/v1/extract/{{ $('e1').item.json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        0
+      ],
+      "id": "b74e419b-9977-486e-be66-76d9c9787dba",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "mgGurhJLDSEhGZuz",
+          "name": "Firecrawl tutorial"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "17357485-2b0e-4fb2-a958-3774787d4ca9",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        920,
+        0
+      ],
+      "id": "1b1f9b8c-76db-40ad-8f3f-da7d99e66a5b",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "amount": 7
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1500,
+        140
+      ],
+      "id": "63e90c85-295b-4ff5-9ca1-bb61b4d53fca",
+      "name": "Wait",
+      "webhookId": "c1cf2ff8-85f4-4e52-87c4-adb0386da6fd"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v1/extract",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"urls\": [\"{{ $json['urls'] }}\"],\n  \"prompt\": \"Please extract detailed and accurate medical information from this page about a disease. Follow the provided schema exactly. Focus on collecting key clinical data such as the disease name, definition, causes, symptoms, diagnosis methods, treatments, and epidemiology. Include a well-written summary paragraph that combines the core information into a fluent and informative description, suitable for training a language model. Use only information found directly on the page. Do not make up or infer any content. Return the output strictly in valid JSON format matching the schema.\",\n  \"schema\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"transcription_title\": { \"type\": \"string\" },\n      \"category_specialty\": { \"type\": \"string\" },\n      \"main_transcription_text\": { \"type\": \"string\" },\n      \"training_paragraph\": { \"type\": \"string\" },\n      \"keywords\": {\n        \"type\": \"array\",\n        \"items\": { \"type\": \"string\" }\n      },\n      \"icd_code\": { \"type\": \"string\" },\n      \"synonyms\": {\n        \"type\": \"array\",\n        \"items\": { \"type\": \"string\" }\n      },\n      \"definition\": { \"type\": \"string\" },\n      \"causes\": {\n        \"type\": \"array\",\n        \"items\": { \"type\": \"string\" }\n      },\n      \"risk_factors\": {\n        \"type\": \"array\",\n        \"items\": { \"type\": \"string\" }\n      },\n      \"symptoms\": {\n        \"type\": \"array\",\n        \"items\": { \"type\": \"string\" }\n      },\n      \"complications\": {\n        \"type\": \"array\",\n        \"items\": { \"type\": \"string\" }\n      },\n      \"diagnosis\": {\n        \"type\": \"array\",\n        \"items\": { \"type\": \"string\" }\n      },\n      \"treatment\": {\n        \"type\": \"array\",\n        \"items\": { \"type\": \"string\" }\n      },\n      \"prevention\": {\n        \"type\": \"array\",\n        \"items\": { \"type\": \"string\" }\n      },\n      \"prognosis\": { \"type\": \"string\" },\n      \"epidemiology\": { \"type\": \"string\" },\n      \"affected_populations\": {\n        \"type\": \"array\",\n        \"items\": { \"type\": \"string\" }\n      },\n      \"source_url\": { \"type\": \"string\" }\n    },\n    \"required\": [\n      \"transcription_title\",\n      \"main_transcription_text\",\n      \"definition\",\n      \"causes\",\n      \"symptoms\",\n      \"diagnosis\",\n      \"treatment\",\n      \"training_paragraph\"\n    ]\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "756aaa75-eb66-430e-9267-6512ffc8f570",
+      "name": "e1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "mgGurhJLDSEhGZuz",
+          "name": "Firecrawl tutorial"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "options": {
+          "fileName": "={{ $execution.id }}"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1580,
+        -100
+      ],
+      "id": "eb5058d8-eea5-444e-8750-f8ad1b2f20eb",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1IiM3ErMkRxgeZiGxiC7UdiJy_DrYPmX3svsdlqXHgVc",
+          "mode": "list",
+          "cachedResultName": "data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IiM3ErMkRxgeZiGxiC7UdiJy_DrYPmX3svsdlqXHgVc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IiM3ErMkRxgeZiGxiC7UdiJy_DrYPmX3svsdlqXHgVc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {
+            "success": "={{ $json.success }}",
+            "expiresAt": "={{ $json.expiresAt }}",
+            "status": "={{ $json.status }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "success",
+              "displayName": "success",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "expiresAt",
+              "displayName": "expiresAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "tokensUsed",
+              "displayName": "tokensUsed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1580,
+        -260
+      ],
+      "id": "77dfd1a9-5fe2-46dc-8625-17338f80226e",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "6DaRfaWjsEtylRUY",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "e1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "e1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        []
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7c6f2e86-89ad-4ef3-b5e8-e48e69b65e63",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "438897edeafa97cfbfea8d87e319548f9dfdbc6ef4d7b54634d53b9f52a41179"
+  },
+  "id": "dfaOr64drBW0fi7R",
+  "tags": []
+}
