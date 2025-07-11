@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>MedBot - Analyseur Médical IA</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f7fa; padding: 2rem; }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+    }
+    h1 { color: #1e3a8a; }
+    label { font-weight: bold; display: block; margin-top: 1rem; }
+    input, textarea, button {
+      width: 100%;
+      padding: 1rem;
+      margin-top: 0.5rem;
+      border-radius: 0.5rem;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      margin-top: 1.5rem;
+    }
+    button:hover { background: #1e40af; }
+    .result, .error {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      white-space: pre-wrap;
+    }
+    .result {
+      background: #f0f9ff;
+      border-left: 5px solid #0ea5e9;
+      color: #0c4a6e;
+    }
+    .error {
+      background: #fef2f2;
+      border-left: 5px solid #ef4444;
+      color: #7f1d1d;
+    }
+    #loading {
+      display: none;
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+    .spinner {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #2563eb;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🩺 MedBot – Analyseur Médical IA</h1>
+    <label for="api">URL de votre API Cloudflare Tunnel</label>
+    <input type="url" id="api" placeholder="Ex: https://banana-cure-depending-airline.trycloudflare.com" />
+    <label for="report">Rapport médical à analyser</label>
+    <textarea id="report" rows="8" placeholder="Décrivez les symptômes, l'âge du patient, l'historique médical, etc."></textarea>
+    <button onclick="analyze()">Analyser le rapport</button>
+
+    <!-- Loader -->
+    <div id="loading"><div class="spinner"></div></div>
+
+    <div id="output" class="result" style="display:none;"></div>
+    <div id="error" class="error" style="display:none;"></div>
+  </div>
+  <script>
+    async function analyze() {
+      const api = document.getElementById("api").value.trim();
+      const report = document.getElementById("report").value.trim();
+      const output = document.getElementById("output");
+      const error = document.getElementById("error");
+      const loading = document.getElementById("loading");
+
+      output.style.display = "none";
+      error.style.display = "none";
+      loading.style.display = "block"; // Affiche le spinner
+
+      if (!api || !report) {
+        error.innerText = "Veuillez remplir tous les champs.";
+        error.style.display = "block";
+        loading.style.display = "none";
+        return;
+      }
+
+      try {
+        const res = await fetch(api + "/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ report })
+        });
+        if (!res.ok) throw new Error("Erreur API : " + res.status);
+        const data = await res.json();
+        output.innerText = `✅ Résumé :\n${data.summary}\n\n🧠 Interprétation :\n${data.interpretation}\n\n💊 Solution :\n${data.solution}`;
+        output.style.display = "block";
+      } catch (e) {
+        error.innerText = "❌ Une erreur est survenue : " + (e.message || "erreur inconnue");
+        error.style.display = "block";
+      } finally {
+        loading.style.display = "none"; // Masque le spinner
+      }
+    }
+  </script>
+</body>
+</html>
