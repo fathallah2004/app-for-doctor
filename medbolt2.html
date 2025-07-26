@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>MedBot - Analyseur Médical IA</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f5f7fa; padding: 2rem; }
@@ -37,6 +37,8 @@
       padding: 1.5rem;
       border-radius: 0.5rem;
       white-space: pre-wrap;
+      max-height: 400px;
+      overflow-y: auto;
     }
     .result {
       background: #f0f9ff;
@@ -71,10 +73,12 @@
 <body>
   <div class="container">
     <h1>🩺 MedBot – Analyseur Médical IA</h1>
-    <label for="api">URL de votre API Cloudflare Tunnel</label>
-    <input type="url" id="api" placeholder="Ex: https://banana-cure-depending-airline.trycloudflare.com" />
+    <label for="api">URL de votre API FastAPI</label>
+    <input type="url" id="api" placeholder="Ex: http://localhost:8000" />
+
     <label for="report">Rapport médical à analyser</label>
     <textarea id="report" rows="8" placeholder="Décrivez les symptômes, l'âge du patient, l'historique médical, etc."></textarea>
+
     <button onclick="analyze()">Analyser le rapport</button>
 
     <!-- Loader -->
@@ -83,6 +87,7 @@
     <div id="output" class="result" style="display:none;"></div>
     <div id="error" class="error" style="display:none;"></div>
   </div>
+
   <script>
     async function analyze() {
       const api = document.getElementById("api").value.trim();
@@ -94,6 +99,7 @@
       output.style.display = "none";
       error.style.display = "none";
       loading.style.display = "block";
+      output.textContent = "";
 
       if (!api || !report) {
         error.innerText = "Veuillez remplir tous les champs.";
@@ -103,21 +109,31 @@
       }
 
       try {
-        const res = await fetch(api + "/analyze", {
+        const response = await fetch(api + "/analyze", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ report })
+          body: JSON.stringify({ report }),
         });
-        if (!res.ok) throw new Error("Erreur API : " + res.status);
-        const data = await res.json();
-        
-        // Format solutions as bullet points
-        const solutionsText = data.solutions 
-          ? data.solutions.map(sol => `• ${sol}`).join('\n') 
-          : "Aucune solution générée";
-        
-        output.innerText = `✅ Résumé :\n${data.summary}\n\n🧠 Interprétation :\n${data.interpretation}\n\n💊 Solutions :\n${solutionsText}`;
-        output.style.display = "block";
+
+        if (!response.ok) {
+          throw new Error("Erreur API : " + response.status);
+        }
+
+        // Handle streaming text response
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let done = false;
+
+        while (!done) {
+          const { value, done: doneReading } = await reader.read();
+          done = doneReading;
+          if (value) {
+            const chunk = decoder.decode(value);
+            output.textContent += chunk;
+            output.style.display = "block";
+          }
+        }
+
       } catch (e) {
         error.innerText = "❌ Une erreur est survenue : " + (e.message || "erreur inconnue");
         error.style.display = "block";
